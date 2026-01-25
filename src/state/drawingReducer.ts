@@ -124,6 +124,24 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
         };
       }
 
+      if (state.present.tool === "ellipse") {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              kind: "ellipse",
+              startX: action.x,
+              startY: action.y,
+              x: action.x,
+              y: action.y,
+              radiusX: 0,
+              radiusY: 0,
+            },
+          },
+        };
+      }
+
       return state;
     }
 
@@ -164,6 +182,31 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
               ...state.present.draft,
               width: action.x - state.present.draft.x,
               height: action.y - state.present.draft.y,
+            },
+          },
+        };
+      }
+      
+      if (state.present.draft.kind === "ellipse") {
+        const startX = state.present.draft.startX;
+        const startY = state.present.draft.startY;
+
+        const centerX = (startX + action.x) / 2;
+        const centerY = (startY + action.y) / 2;
+
+        const radiusX = Math.abs(action.x - startX) / 2;
+        const radiusY = Math.abs(action.y - startY) / 2;
+
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              ...state.present.draft,
+              x: centerX,
+              y: centerY,
+              radiusX,
+              radiusY,
             },
           },
         };
@@ -231,6 +274,31 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
               y: state.present.draft.y,
               width: state.present.draft.width,
               height: state.present.draft.height,
+              stroke: state.present.strokeColor,
+              strokeWidth: state.present.strokeWidth,
+              createdAt: now,
+            },
+          ],
+          draft: { kind: "none" },
+        };
+
+        return commitPresent(state, nextPresent);
+      }
+
+      if (state.present.draft.kind === "ellipse") {
+        const now = Date.now();
+
+        const nextPresent: PresentState = {
+          ...state.present,
+          shapes: [
+            ...state.present.shapes,
+            {
+              id: String(now),
+              type: "ellipse",
+              x: state.present.draft.x,
+              y: state.present.draft.y,
+              radiusX: state.present.draft.radiusX,
+              radiusY: state.present.draft.radiusY,
               stroke: state.present.strokeColor,
               strokeWidth: state.present.strokeWidth,
               createdAt: now,

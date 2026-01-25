@@ -1,4 +1,4 @@
-import { Stage, Layer, Line, Rect } from "react-konva";
+import { Stage, Layer, Line, Rect, Ellipse } from "react-konva";
 import type { PresentState } from "../domain/present";
 import type { Action } from "../domain/action";
 
@@ -85,6 +85,20 @@ export default function CanvasStage({ present, dispatch }: Props) {
             );
           }
 
+          if (shape.type === "ellipse") {
+            return (
+              <Ellipse
+                key={shape.id}
+                x={shape.x}
+                y={shape.y}
+                radiusX={shape.radiusX}
+                radiusY={shape.radiusY}
+                stroke={shape.stroke}
+                strokeWidth={shape.strokeWidth}
+              />
+            );
+          }
+
           return null;
         })}
 
@@ -122,6 +136,17 @@ export default function CanvasStage({ present, dispatch }: Props) {
             />
           );
         })()}
+        
+        {present.draft.kind === "ellipse" && (
+          <Ellipse
+            x={present.draft.x}
+            y={present.draft.y}
+            radiusX={present.draft.radiusX}
+            radiusY={present.draft.radiusY}
+            stroke={present.strokeColor}
+            strokeWidth={present.strokeWidth}
+          />
+        )}
         
       </Layer>
     </Stage>
