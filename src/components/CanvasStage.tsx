@@ -1,4 +1,4 @@
-import { Stage, Layer, Line } from "react-konva";
+import { Stage, Layer, Line, Rect } from "react-konva";
 import type { PresentState } from "../domain/present";
 import type { Action } from "../domain/action";
 
@@ -9,6 +9,14 @@ type Props = {
 
 // Konva Stage 렌더링 및 이벤트 처리 컴포넌트
 export default function CanvasStage({ present, dispatch }: Props) {
+  function normalizeRect(x: number, y: number, width: number, height: number) {
+  const nx = width < 0 ? x + width : x;
+  const ny = height < 0 ? y + height : y;
+  const nw = Math.abs(width);
+  const nh = Math.abs(height);
+  return { x: nx, y: ny, width: nw, height: nh };
+}
+
   return (
     <Stage
       width={1700}
@@ -62,6 +70,21 @@ export default function CanvasStage({ present, dispatch }: Props) {
             );
           }
 
+          if (shape.type === "rect") {
+            const r = normalizeRect(shape.x, shape.y, shape.width, shape.height);
+            return (
+              <Rect
+                key={shape.id}
+                x={r.x}
+                y={r.y}
+                width={r.width}
+                height={r.height}
+                stroke={shape.stroke}
+                strokeWidth={shape.strokeWidth}
+              />
+            );
+          }
+
           return null;
         })}
 
@@ -85,6 +108,21 @@ export default function CanvasStage({ present, dispatch }: Props) {
             lineJoin="round"
           />
         )}
+
+        {present.draft.kind === "rect" && (() => {
+          const r = normalizeRect(present.draft.x, present.draft.y, present.draft.width, present.draft.height);
+          return (
+            <Rect
+              x={r.x}
+              y={r.y}
+              width={r.width}
+              height={r.height}
+              stroke={present.strokeColor}
+              strokeWidth={present.strokeWidth}
+            />
+          );
+        })()}
+        
       </Layer>
     </Stage>
   );

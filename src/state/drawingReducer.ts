@@ -108,7 +108,22 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
         };
       }
 
-      // 나머지 도구(rect/ellipse/polygon)는 다음 단계에서 구현
+      if (state.present.tool === "rect") {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              kind: "rect",
+              x: action.x,
+              y: action.y,
+              width: 0,
+              height: 0,
+            },
+          },
+        };
+      }
+
       return state;
     }
 
@@ -140,11 +155,24 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
         };
       }
 
+      if (state.present.draft.kind === "rect") {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              ...state.present.draft,
+              width: action.x - state.present.draft.x,
+              height: action.y - state.present.draft.y,
+            },
+          },
+        };
+      }
+      
       return state;
     }
 
     case "POINTER_UP": {
-      // free draw 확정
       if (state.present.draft.kind === "free") {
         const now = Date.now();
         const nextPresent: PresentState = {
@@ -166,7 +194,6 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
         return commitPresent(state, nextPresent);
       }
 
-      // line 확정
       if (state.present.draft.kind === "line") {
         const now = Date.now();
         const nextPresent: PresentState = {
@@ -180,6 +207,30 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
               y1: state.present.draft.y1,
               x2: state.present.draft.x2,
               y2: state.present.draft.y2,
+              stroke: state.present.strokeColor,
+              strokeWidth: state.present.strokeWidth,
+              createdAt: now,
+            },
+          ],
+          draft: { kind: "none" },
+        };
+
+        return commitPresent(state, nextPresent);
+      }
+
+      if (state.present.draft.kind === "rect") {
+        const now = Date.now();
+        const nextPresent: PresentState = {
+          ...state.present,
+          shapes: [
+            ...state.present.shapes,
+            {
+              id: String(now),
+              type: "rect",
+              x: state.present.draft.x,
+              y: state.present.draft.y,
+              width: state.present.draft.width,
+              height: state.present.draft.height,
               stroke: state.present.strokeColor,
               strokeWidth: state.present.strokeWidth,
               createdAt: now,
