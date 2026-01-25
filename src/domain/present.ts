@@ -17,4 +17,6 @@ export type PresentState = {
   strokeColor: string;
   strokeWidth: number;
   draft: Draft;
+
+  polygonCursor: { x: number; y: number } | null;
 };

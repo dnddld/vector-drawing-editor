@@ -11,7 +11,11 @@ export type Action =
   | { type: "POINTER_DOWN"; x: number; y: number }
   | { type: "POINTER_MOVE"; x: number; y: number }
   | { type: "POINTER_UP"; x: number; y: number }
-  
+
+  | { type: "POLYGON_ADD_POINT"; x: number; y: number }
+  | { type: "POLYGON_MOVE"; x: number; y: number }
+  | { type: "POLYGON_CLOSE" }
+
   | { type: "COMMIT_SHAPE"; shape: Shape }
   | { type: "UNDO" }
   | { type: "REDO" }

@@ -15,26 +15,60 @@ export default function CanvasStage({ present, dispatch }: Props) {
   const nw = Math.abs(width);
   const nh = Math.abs(height);
   return { x: nx, y: ny, width: nw, height: nh };
-}
+  }
 
+  const POLYGON_CLOSE_THRESHOLD = 12;
+
+  // 다각형 그리기 시 시작점 근처 클릭 여부 판별
+  function isNearFirstPoint(points: number[], x: number, y: number): boolean {
+    if (points.length < 2) return false;
+
+    const x0 = points[0];
+    const y0 = points[1];
+
+    const dx = x - x0;
+    const dy = y - y0;
+
+    return Math.sqrt(dx * dx + dy * dy) <= POLYGON_CLOSE_THRESHOLD;
+  }
   return (
     <Stage
       width={1700}
       height={700}
       style={{ border: "1px solid #ddd", background: "#fff" }}
       onPointerDown={(e) => {
-        const pos = e.target.getStage()?.getPointerPosition();
+        const stage = e.target.getStage();
+        const pos = stage?.getPointerPosition();
         if (!pos) return;
+
+        if (present.tool === "polygon") {
+          if (present.draft.kind === "polygon" && isNearFirstPoint(present.draft.points, pos.x, pos.y)) {
+            dispatch({ type: "POLYGON_CLOSE" });
+            return;
+          }
+
+          dispatch({ type: "POLYGON_ADD_POINT", x: pos.x, y: pos.y });
+          return;
+        }
 
         dispatch({ type: "POINTER_DOWN", x: pos.x, y: pos.y });
       }}
+
       onPointerMove={(e) => {
         const pos = e.target.getStage()?.getPointerPosition();
         if (!pos) return;
 
+        if (present.tool === "polygon") {
+          dispatch({ type: "POLYGON_MOVE", x: pos.x, y: pos.y });
+          return;
+        }
+
         dispatch({ type: "POINTER_MOVE", x: pos.x, y: pos.y });
       }}
+
       onPointerUp={(e) => {
+        if (present.tool === "polygon") return;
+
         const pos = e.target.getStage()?.getPointerPosition();
         if (!pos) return;
 
@@ -145,6 +179,19 @@ export default function CanvasStage({ present, dispatch }: Props) {
             radiusY={present.draft.radiusY}
             stroke={present.strokeColor}
             strokeWidth={present.strokeWidth}
+          />
+        )}
+
+        {present.draft.kind === "polygon" && (
+          <Line
+            points={
+              present.polygonCursor
+                ? [...present.draft.points, present.polygonCursor.x, present.polygonCursor.y]
+                : present.draft.points
+            }
+            stroke={present.strokeColor}
+            strokeWidth={present.strokeWidth}
+            lineJoin="round"
           />
         )}
         

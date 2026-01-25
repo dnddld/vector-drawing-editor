@@ -10,6 +10,7 @@ export function createInitialPresent(): PresentState {
     strokeColor: "#111111",
     strokeWidth: 5,
     draft: { kind: "none" },
+    polygonCursor: null,
   };
 }
 
@@ -31,6 +32,7 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
           ...state.present,
           tool: action.tool,
           draft: { kind: "none" },
+          polygonCursor: null,
         },
       };
     }
@@ -313,6 +315,87 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
       return state;
     }
 
+    case "POLYGON_ADD_POINT": {
+      if (state.present.tool !== "polygon") return state;
+
+      // draft가 polygon이 아니면 새로 시작
+      if (state.present.draft.kind !== "polygon") {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              kind: "polygon",
+              points: [action.x, action.y],
+            },
+            polygonCursor: { x: action.x, y: action.y },
+          },
+        };
+      }
+
+      // 이미 polygon draft 진행 중이면 점 추가
+      return {
+        ...state,
+        present: {
+          ...state.present,
+          draft: {
+            kind: "polygon",
+            points: [...state.present.draft.points, action.x, action.y],
+          },
+          polygonCursor: { x: action.x, y: action.y },
+        },
+      };
+    }
+
+    case "POLYGON_CLOSE": {
+      if (state.present.tool !== "polygon") return state;
+      if (state.present.draft.kind !== "polygon") return state;
+
+      if (state.present.draft.points.length < 6) {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: { kind: "none" },
+            polygonCursor: null,
+          },
+        };
+      }
+
+      const now = Date.now();
+      const nextPresent: PresentState = {
+        ...state.present,
+        shapes: [
+          ...state.present.shapes,
+          {
+            id: String(now),
+            type: "polygon",
+            points: state.present.draft.points,
+            stroke: state.present.strokeColor,
+            strokeWidth: state.present.strokeWidth,
+            createdAt: now,
+          },
+        ],
+        draft: { kind: "none" },
+        polygonCursor: null,
+      };
+
+      return commitPresent(state, nextPresent);
+    }
+    
+    case "POLYGON_MOVE": {
+      if (state.present.tool !== "polygon") return state;
+      if (state.present.draft.kind !== "polygon") return state;
+
+      return {
+        ...state,
+        present: {
+          ...state.present,
+          polygonCursor: { x: action.x, y: action.y },
+        },
+      };
+    }
+    
     default:
       return state;
   }
