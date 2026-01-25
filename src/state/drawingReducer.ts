@@ -79,56 +79,119 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
 
 
     case "POINTER_DOWN": {
-      if (state.present.tool !== "free") return state;
-
-      return {
-        ...state,
-        present: {
-          ...state.present,
-          draft: {
-            kind: "free",
-            points: [action.x, action.y],
+      if (state.present.tool === "free") {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              kind: "free",
+              points: [action.x, action.y],
+            },
           },
-        },
-      };
+        };
+      }
+
+      if (state.present.tool === "line") {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              kind: "line",
+              x1: action.x,
+              y1: action.y,
+              x2: action.x,
+              y2: action.y,
+            },
+          },
+        };
+      }
+
+      // 나머지 도구(rect/ellipse/polygon)는 다음 단계에서 구현
+      return state;
     }
 
     case "POINTER_MOVE": {
-      if (state.present.draft.kind !== "free") return state;
-
-      return {
-        ...state,
-        present: {
-          ...state.present,
-          draft: {
-            kind: "free",
-            points: [...state.present.draft.points, action.x, action.y],
+      if (state.present.draft.kind === "free") {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              kind: "free",
+              points: [...state.present.draft.points, action.x, action.y],
+            },
           },
-        },
-      };
+        };
+      }
+
+      if (state.present.draft.kind === "line") {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              ...state.present.draft,
+              x2: action.x,
+              y2: action.y,
+            },
+          },
+        };
+      }
+
+      return state;
     }
 
     case "POINTER_UP": {
-      if (state.present.draft.kind !== "free") return state;
+      // free draw 확정
+      if (state.present.draft.kind === "free") {
+        const now = Date.now();
+        const nextPresent: PresentState = {
+          ...state.present,
+          shapes: [
+            ...state.present.shapes,
+            {
+              id: String(now),
+              type: "free",
+              points: state.present.draft.points,
+              stroke: state.present.strokeColor,
+              strokeWidth: state.present.strokeWidth,
+              createdAt: now,
+            },
+          ],
+          draft: { kind: "none" },
+        };
 
-      const now = Date.now();
-      const nextPresent: PresentState = {
-        ...state.present,
-        shapes: [
-          ...state.present.shapes,
-          {
-            id: String(now),
-            type: "free",
-            points: state.present.draft.points,
-            stroke: state.present.strokeColor,
-            strokeWidth: state.present.strokeWidth,
-            createdAt: now,
-          },
-        ],
-        draft: { kind: "none" },
-      };
+        return commitPresent(state, nextPresent);
+      }
 
-      return commitPresent(state, nextPresent);
+      // line 확정
+      if (state.present.draft.kind === "line") {
+        const now = Date.now();
+        const nextPresent: PresentState = {
+          ...state.present,
+          shapes: [
+            ...state.present.shapes,
+            {
+              id: String(now),
+              type: "line",
+              x1: state.present.draft.x1,
+              y1: state.present.draft.y1,
+              x2: state.present.draft.x2,
+              y2: state.present.draft.y2,
+              stroke: state.present.strokeColor,
+              strokeWidth: state.present.strokeWidth,
+              createdAt: now,
+            },
+          ],
+          draft: { kind: "none" },
+        };
+
+        return commitPresent(state, nextPresent);
+      }
+
+      return state;
     }
 
     default:

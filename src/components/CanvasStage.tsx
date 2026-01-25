@@ -36,24 +36,49 @@ export default function CanvasStage({ present, dispatch }: Props) {
       <Layer>
         {/* 확정된 도형 */}
         {present.shapes.map((shape) => {
-          if (shape.type !== "free") return null;
+          if (shape.type === "free") {
+            return (
+              <Line
+                key={shape.id}
+                points={shape.points}
+                stroke={shape.stroke}
+                strokeWidth={shape.strokeWidth}
+                lineCap="round"
+                lineJoin="round"
+              />
+            );
+          }
 
-          return (
-            <Line
-              key={shape.id}
-              points={shape.points}
-              stroke={shape.stroke}
-              strokeWidth={shape.strokeWidth}
-              lineCap="round"
-              lineJoin="round"
-            />
-          );
+          if (shape.type === "line") {
+            return (
+              <Line
+                key={shape.id}
+                points={[shape.x1, shape.y1, shape.x2, shape.y2]}
+                stroke={shape.stroke}
+                strokeWidth={shape.strokeWidth}
+                lineCap="round"
+                lineJoin="round"
+              />
+            );
+          }
+
+          return null;
         })}
 
         {/* draft 프리뷰 */}
         {present.draft.kind === "free" && (
           <Line
             points={present.draft.points}
+            stroke={present.strokeColor}
+            strokeWidth={present.strokeWidth}
+            lineCap="round"
+            lineJoin="round"
+          />
+        )}
+
+        {present.draft.kind === "line" && (
+          <Line
+            points={[present.draft.x1, present.draft.y1, present.draft.x2, present.draft.y2]}
             stroke={present.strokeColor}
             strokeWidth={present.strokeWidth}
             lineCap="round"
