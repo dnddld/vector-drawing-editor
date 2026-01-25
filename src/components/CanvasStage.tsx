@@ -1,4 +1,5 @@
 import { Stage, Layer, Line, Rect, Ellipse } from "react-konva";
+import type React from "react";
 import type { PresentState } from "../domain/present";
 import type { Action } from "../domain/action";
 
@@ -31,6 +32,7 @@ export default function CanvasStage({ present, dispatch }: Props) {
 
     return Math.sqrt(dx * dx + dy * dy) <= POLYGON_CLOSE_THRESHOLD;
   }
+
   return (
     <Stage
       width={1700}
@@ -53,7 +55,6 @@ export default function CanvasStage({ present, dispatch }: Props) {
 
         dispatch({ type: "POINTER_DOWN", x: pos.x, y: pos.y });
       }}
-
       onPointerMove={(e) => {
         const pos = e.target.getStage()?.getPointerPosition();
         if (!pos) return;
@@ -74,9 +75,10 @@ export default function CanvasStage({ present, dispatch }: Props) {
 
         dispatch({ type: "POINTER_UP", x: pos.x, y: pos.y });
       }}
+
     >
       <Layer>
-        {/* 확정된 도형 */}
+        {/* 확정된 도형 목록 렌더링 */}
         {present.shapes.map((shape) => {
           if (shape.type === "free") {
             return (
@@ -133,10 +135,22 @@ export default function CanvasStage({ present, dispatch }: Props) {
             );
           }
 
-          return null;
+          if (shape.type === "polygon") {
+            return (
+              <Line
+                key={shape.id}
+                points={[...shape.points, shape.points[0], shape.points[1]]}
+                stroke={shape.stroke}
+                strokeWidth={shape.strokeWidth}
+                closed
+                lineJoin="round"
+              />
+            );
+          }         
+          
         })}
 
-        {/* draft 프리뷰 */}
+        {/* 임시 드로잉 상태 (Draft) 렌더링 */}
         {present.draft.kind === "free" && (
           <Line
             points={present.draft.points}
@@ -170,7 +184,7 @@ export default function CanvasStage({ present, dispatch }: Props) {
             />
           );
         })()}
-        
+
         {present.draft.kind === "ellipse" && (
           <Ellipse
             x={present.draft.x}
@@ -194,7 +208,8 @@ export default function CanvasStage({ present, dispatch }: Props) {
             lineJoin="round"
           />
         )}
-        
+
+
       </Layer>
     </Stage>
   );

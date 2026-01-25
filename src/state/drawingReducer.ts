@@ -22,6 +22,21 @@ export function createInitialHistory(): HistoryState {
   };
 }
 
+// 초기 로드 시 로컬 스토리지 데이터로 히스토리 초기화
+export function createInitialHistoryFromPresent(restoredPresent: PresentState | null): HistoryState {
+  if (!restoredPresent) return createInitialHistory();
+
+  return {
+    past: [],
+    present: {
+      ...restoredPresent,
+      draft: { kind: "none" },
+      polygonCursor: null,
+    },
+    future: [],
+  };
+}
+
 // 상태 변경을 처리하는 리듀서 함수
 export function drawingReducer(state: HistoryState, action: Action): HistoryState {
   switch (action.type) {
@@ -75,9 +90,14 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
     case "LOAD_PRESENT":
       return {
         past: [],
-        present: action.present,
+        present: {
+          ...action.present,
+          draft: { kind: "none" },
+          polygonCursor: null,
+        },
         future: [],
       };
+
 
 
     case "POINTER_DOWN": {
@@ -188,7 +208,7 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
           },
         };
       }
-      
+
       if (state.present.draft.kind === "ellipse") {
         const startX = state.present.draft.startX;
         const startY = state.present.draft.startY;
@@ -218,6 +238,7 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
     }
 
     case "POINTER_UP": {
+      // 드로잉 종료 시 도형 확정 및 커밋
       if (state.present.draft.kind === "free") {
         const now = Date.now();
         const nextPresent: PresentState = {
@@ -312,13 +333,15 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
         return commitPresent(state, nextPresent);
       }
 
+
+
       return state;
     }
 
+    
     case "POLYGON_ADD_POINT": {
       if (state.present.tool !== "polygon") return state;
 
-      // draft가 polygon이 아니면 새로 시작
       if (state.present.draft.kind !== "polygon") {
         return {
           ...state,
@@ -333,7 +356,6 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
         };
       }
 
-      // 이미 polygon draft 진행 중이면 점 추가
       return {
         ...state,
         present: {
@@ -346,7 +368,7 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
         },
       };
     }
-
+    
     case "POLYGON_CLOSE": {
       if (state.present.tool !== "polygon") return state;
       if (state.present.draft.kind !== "polygon") return state;
@@ -382,7 +404,7 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
 
       return commitPresent(state, nextPresent);
     }
-    
+
     case "POLYGON_MOVE": {
       if (state.present.tool !== "polygon") return state;
       if (state.present.draft.kind !== "polygon") return state;
