@@ -14,8 +14,6 @@ type Props = {
 
   onUndo: () => void;
   onRedo: () => void;
-
-  onAddDummyShape: () => void;
 };
 
 const TOOL_LABEL: Record<Tool, string> = {
@@ -48,7 +46,6 @@ export default function Toolbar(props: Props) {
     onChangeWidth,
     onUndo,
     onRedo,
-    onAddDummyShape,
   } = props;
 
   return (
@@ -157,10 +154,6 @@ export default function Toolbar(props: Props) {
           실행 취소
         </button>
         <button onClick={onRedo} disabled={!canRedo}>
-          Redo
-        </button>
-
-        <button onClick={onAddDummyShape} style={{ marginLeft: 8 }}>
           다시 실행
         </button>
       </div>

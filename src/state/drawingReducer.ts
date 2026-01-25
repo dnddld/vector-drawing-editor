@@ -77,6 +77,60 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
         future: [],
       };
 
+
+    case "POINTER_DOWN": {
+      if (state.present.tool !== "free") return state;
+
+      return {
+        ...state,
+        present: {
+          ...state.present,
+          draft: {
+            kind: "free",
+            points: [action.x, action.y],
+          },
+        },
+      };
+    }
+
+    case "POINTER_MOVE": {
+      if (state.present.draft.kind !== "free") return state;
+
+      return {
+        ...state,
+        present: {
+          ...state.present,
+          draft: {
+            kind: "free",
+            points: [...state.present.draft.points, action.x, action.y],
+          },
+        },
+      };
+    }
+
+    case "POINTER_UP": {
+      if (state.present.draft.kind !== "free") return state;
+
+      const now = Date.now();
+      const nextPresent: PresentState = {
+        ...state.present,
+        shapes: [
+          ...state.present.shapes,
+          {
+            id: String(now),
+            type: "free",
+            points: state.present.draft.points,
+            stroke: state.present.strokeColor,
+            strokeWidth: state.present.strokeWidth,
+            createdAt: now,
+          },
+        ],
+        draft: { kind: "none" },
+      };
+
+      return commitPresent(state, nextPresent);
+    }
+
     default:
       return state;
   }

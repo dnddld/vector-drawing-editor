@@ -1,5 +1,5 @@
 import { useReducer } from "react";
-import { Stage, Layer, Rect, Text } from "react-konva";
+import CanvasStage from "./components/CanvasStage";
 import Toolbar from "./components/Toolbar";
 import { createInitialHistory, drawingReducer } from "./state/drawingReducer";
 
@@ -23,45 +23,10 @@ function App() {
         onChangeWidth={(width) => dispatch({ type: "SET_STROKE_WIDTH", width })}
         onUndo={() => dispatch({ type: "UNDO" })}
         onRedo={() => dispatch({ type: "REDO" })}
-        onAddDummyShape={() => {
-          const now = Date.now();
-          dispatch({
-            type: "COMMIT_SHAPE",
-            shape: {
-              id: String(now),
-              type: "rect",
-              stroke: present.strokeColor,
-              strokeWidth: present.strokeWidth,
-              createdAt: now,
-              x: 20 + present.shapes.length * 10,
-              y: 60 + present.shapes.length * 10,
-              width: 120,
-              height: 80,
-            },
-          });
-        }}
       />
 
-      <Stage width={900} height={600} style={{ border: "1px solid #ddd", background: "#fff" }}>
-        <Layer>
-          <Text text="Toolbar Ready" x={12} y={12} fontSize={18} />
+      <CanvasStage present={present} dispatch={dispatch} />
 
-          {present.shapes.map((s) => {
-            if (s.type !== "rect") return null;
-            return (
-              <Rect
-                key={s.id}
-                x={s.x}
-                y={s.y}
-                width={s.width}
-                height={s.height}
-                stroke={s.stroke}
-                strokeWidth={s.strokeWidth}
-              />
-            );
-          })}
-        </Layer>
-      </Stage>
     </div>
   );
 }
