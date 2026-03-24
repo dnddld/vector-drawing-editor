@@ -122,6 +122,19 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
         };
       }
 
+      if (state.present.tool === "eraser") {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              kind: "eraser",
+              points: [action.x, action.y],
+            },
+          },
+        };
+      }
+
       if (state.present.tool === "line") {
         return {
           ...state,
@@ -183,6 +196,19 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
             ...state.present,
             draft: {
               kind: "free",
+              points: [...state.present.draft.points, action.x, action.y],
+            },
+          },
+        };
+      }
+
+      if (state.present.draft.kind === "eraser") {
+        return {
+          ...state,
+          present: {
+            ...state.present,
+            draft: {
+              kind: "eraser",
               points: [...state.present.draft.points, action.x, action.y],
             },
           },
@@ -256,6 +282,27 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
             {
               id: String(now),
               type: "free",
+              points: state.present.draft.points,
+              stroke: state.present.strokeColor,
+              strokeWidth: state.present.strokeWidth,
+              createdAt: now,
+            },
+          ],
+          draft: { kind: "none" },
+        };
+
+        return commitPresent(state, nextPresent);
+      }
+
+      if (state.present.draft.kind === "eraser") {
+        const now = Date.now();
+        const nextPresent: PresentState = {
+          ...state.present,
+          shapes: [
+            ...state.present.shapes,
+            {
+              id: String(now),
+              type: "eraser",
               points: state.present.draft.points,
               stroke: state.present.strokeColor,
               strokeWidth: state.present.strokeWidth,

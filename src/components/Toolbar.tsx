@@ -23,6 +23,7 @@ const TOOL_LABEL: Record<Tool, string> = {
   rect: "사각형",
   ellipse: "타원",
   polygon: "다각형",
+  eraser: "지우개",
 };
 
 const COLOR_PRESETS = ["#111111", "#E11D48", "#2563EB", "#16A34A", "#F59E0B", "#7C3AED"];

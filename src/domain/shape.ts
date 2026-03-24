@@ -1,4 +1,4 @@
-export type ShapeType = "free" | "line" | "rect" | "ellipse" | "polygon";
+export type ShapeType = "free" | "line" | "rect" | "ellipse" | "polygon" | "eraser";
 
 // 모든 도형이 공통으로 가지는 속성
 export type ShapeBase = {
@@ -47,4 +47,10 @@ export type PolygonShape = ShapeBase & {
   points: number[];
 };
 
-export type Shape = FreeShape | LineShape | RectShape | EllipseShape | PolygonShape;
+// 지우개
+export type EraserShape = ShapeBase & {
+  type: "eraser";
+  points: number[];
+};
+
+export type Shape = FreeShape | LineShape | RectShape | EllipseShape | PolygonShape | EraserShape;

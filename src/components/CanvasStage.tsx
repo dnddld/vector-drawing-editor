@@ -1,5 +1,5 @@
-import { Stage, Layer, Line, Rect, Ellipse } from "react-konva";
-import type React from "react";
+import { Stage, Layer, Line, Rect, Ellipse, Circle } from "react-konva";
+import React, { useState } from "react";
 import type { PresentState } from "../domain/present";
 import type { Action } from "../domain/action";
 
@@ -10,6 +10,8 @@ type Props = {
 
 // Konva Stage 렌더링 및 이벤트 처리 컴포넌트
 export default function CanvasStage({ present, dispatch }: Props) {
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
+
   function normalizeRect(x: number, y: number, width: number, height: number) {
   const nx = width < 0 ? x + width : x;
   const ny = height < 0 ? y + height : y;
@@ -37,7 +39,13 @@ export default function CanvasStage({ present, dispatch }: Props) {
     <Stage
       width={1700}
       height={700}
-      style={{ border: "1px solid #ddd", background: "#fff" }}
+      style={{
+        border: "1px solid #ddd",
+        background: "#fff",
+        cursor: present.tool === "eraser"
+          ? 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>\') 0 24, auto'
+          : "crosshair",
+      }}
       onPointerDown={(e) => {
         const stage = e.target.getStage();
         const pos = stage?.getPointerPosition();
@@ -64,7 +72,12 @@ export default function CanvasStage({ present, dispatch }: Props) {
           return;
         }
 
+        setCursorPos({ x: pos.x, y: pos.y });
         dispatch({ type: "POINTER_MOVE", x: pos.x, y: pos.y });
+      }}
+
+      onPointerLeave={() => {
+        setCursorPos(null);
       }}
 
       onPointerUp={(e) => {
@@ -147,6 +160,20 @@ export default function CanvasStage({ present, dispatch }: Props) {
               />
             );
           }         
+
+          if (shape.type === "eraser") {
+            return (
+              <Line
+                key={shape.id}
+                points={shape.points}
+                stroke={shape.stroke}
+                strokeWidth={shape.strokeWidth}
+                lineCap="round"
+                lineJoin="round"
+                globalCompositeOperation="destination-out"
+              />
+            );
+          }
           
         })}
 
@@ -209,6 +236,29 @@ export default function CanvasStage({ present, dispatch }: Props) {
           />
         )}
 
+        {present.draft.kind === "eraser" && (
+          <Line
+            points={present.draft.points}
+            stroke={present.strokeColor}
+            strokeWidth={present.strokeWidth}
+            lineCap="round"
+            lineJoin="round"
+            globalCompositeOperation="destination-out"
+          />
+        )}
+
+        {/* 지우개 도구 사용 시 현재 굵기를 나타내는 커서 (실제 렌더링엔 포함되지 않고 UI로만 보임) */}
+        {present.tool === "eraser" && cursorPos && (
+          <Circle
+            x={cursorPos.x}
+            y={cursorPos.y}
+            radius={present.strokeWidth / 2}
+            stroke="#666"
+            strokeWidth={1}
+            fill="rgba(200, 200, 200, 0.5)"
+            listening={false}
+          />
+        )}
 
       </Layer>
     </Stage>
