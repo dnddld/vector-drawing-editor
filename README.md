@@ -1,8 +1,8 @@
-# Neurocle Drawing Tool
+# Vetor Drawing Editor
 
 React 19와 Konva(`react-konva`) 기반으로 구축된 강력한 웹용 벡터 드로잉 에디터입니다. 다양한 도형 그리기, 색상 및 두께 조절, 실행 취소/다시 실행(Undo/Redo), 로컬 스토리지 자동 저장 등의 기능을 제공합니다.
 
-🔗 **라이브 데모:** [Neurocle Drawing Tool (Vercel)](https://woong-vector-drawing-editor.vercel.app/)
+🔗 **라이브 데모:** [Vetor Drawing Editor](https://woong-vector-drawing-editor.vercel.app/)
 
 ## ✨ 주요 기능
 
