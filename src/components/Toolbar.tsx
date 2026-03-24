@@ -14,6 +14,7 @@ type Props = {
 
   onUndo: () => void;
   onRedo: () => void;
+  onClearAll: () => void;
 };
 
 const TOOL_LABEL: Record<Tool, string> = {
@@ -46,6 +47,7 @@ export default function Toolbar(props: Props) {
     onChangeWidth,
     onUndo,
     onRedo,
+    onClearAll,
   } = props;
 
   return (
@@ -150,6 +152,9 @@ export default function Toolbar(props: Props) {
       </div>
 
       <div style={{ display: "flex", gap: 6, alignItems: "center", marginLeft: "auto" }}>
+        <button onClick={onClearAll} style={{ color: "red", border: "1px solid red", backgroundColor: "white", cursor: "pointer", padding: "6px 10px", borderRadius: "8px" }}>
+          전체 지우기
+        </button>
         <button onClick={onUndo} disabled={!canUndo}>
           실행 취소
         </button>

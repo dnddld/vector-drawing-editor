@@ -40,6 +40,7 @@ function App() {
           onChangeWidth={(width) => dispatch({ type: "SET_STROKE_WIDTH", width })}
           onUndo={() => dispatch({ type: "UNDO" })}
           onRedo={() => dispatch({ type: "REDO" })}
+          onClearAll={() => dispatch({ type: "CLEAR_ALL" })}
         />
       </header>
 

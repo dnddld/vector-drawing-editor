@@ -98,7 +98,15 @@ export function drawingReducer(state: HistoryState, action: Action): HistoryStat
         future: [],
       };
 
-
+    case "CLEAR_ALL": {
+      const nextPresent: PresentState = {
+        ...state.present,
+        shapes: [],
+        draft: { kind: "none" },
+        polygonCursor: null,
+      };
+      return commitPresent(state, nextPresent);
+    }
 
     case "POINTER_DOWN": {
       if (state.present.tool === "free") {
