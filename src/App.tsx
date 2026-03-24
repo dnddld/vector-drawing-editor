@@ -27,7 +27,7 @@ function App() {
   return (
     <>
       <header className="app-header">
-        <h1 className="app-title">Neurocle Drawing Tool</h1>
+        <h1 className="app-title">Vector Drawing Editor</h1>
 
         <Toolbar
           tool={present.tool}

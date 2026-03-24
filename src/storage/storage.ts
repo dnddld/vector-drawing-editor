@@ -1,6 +1,6 @@
 import type { PresentState } from "../domain/present";
 
-const STORAGE_KEY = "neurocle_drawing_present_v1";
+const STORAGE_KEY = "drawing_present_v1";
 
 // 저장 전 상태 정규화 (Draft 및 커서 정보 제거)
 function sanitizePresent(present: PresentState): PresentState {
