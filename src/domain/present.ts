@@ -8,7 +8,8 @@ export type Draft =
   | { kind: "line"; x1: number; y1: number; x2: number; y2: number }
   | { kind: "rect"; x: number; y: number; width: number; height: number }
   | { kind: "ellipse"; startX: number; startY: number; x: number; y: number; radiusX: number; radiusY: number }
-  | { kind: "polygon"; points: number[] };
+  | { kind: "polygon"; points: number[] }
+  | { kind: "eraser"; points: number[] };
 
 // 현재 화면에 표시되는 전체 상태
 export type PresentState = {

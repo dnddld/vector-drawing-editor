@@ -19,4 +19,5 @@ export type Action =
   | { type: "COMMIT_SHAPE"; shape: Shape }
   | { type: "UNDO" }
   | { type: "REDO" }
-  | { type: "LOAD_PRESENT"; present: PresentState };
+  | { type: "LOAD_PRESENT"; present: PresentState }
+  | { type: "CLEAR_ALL" };
